@@ -2,6 +2,12 @@
 
 Local Docker Compose workspace for the VROOM ride-hailing microservices.
 
+## Fresh Machine Setup
+
+For a beginner-friendly setup from a new laptop, including clone commands, Docker startup, demo flow, logs, monitoring, and optional Minikube evidence, read:
+
+- [VROOM VROOM Setup From Fresh Machine](docs/SETUP_FROM_FRESH_MACHINE.md)
+
 ## Services
 
 - `rider-service` on `http://localhost:8081`
@@ -18,7 +24,6 @@ Local Docker Compose workspace for the VROOM ride-hailing microservices.
 Run these commands from the workspace root:
 
 ```bash
-cd /Users/pratheushakk/work/personal/BITS/scalable
 docker compose down
 docker compose up --build -d
 docker compose ps
@@ -31,7 +36,6 @@ docker compose ps
 Use this only when you want to remove persisted Compose data, including the payment PostgreSQL volume:
 
 ```bash
-cd /Users/pratheushakk/work/personal/BITS/scalable
 docker compose down -v
 docker compose up --build -d
 docker compose ps
