@@ -1,0 +1,256 @@
+name: ride-hailing-platform
+
+services:
+  rider-service:
+    build:
+      context: ./Rider_Service
+      dockerfile: Dockerfile
+    container_name: rider-service
+    ports:
+      - "8081:8081"
+    restart: unless-stopped
+
+  driver-service:
+    build:
+      context: ./driver-service
+      dockerfile: Dockerfile
+    container_name: driver-service
+    environment:
+      PORT: 3003
+      SERVICE_NAME: driver-service
+      DB_PATH: /app/runtime/driver-service.db
+    ports:
+      - "3003:3003"
+    volumes:
+      - driver-db-data:/app/runtime
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3003/health').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))"
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  trip-service:
+    build:
+      context: ./trip-service
+      dockerfile: Dockerfile
+    container_name: trip-service
+    environment:
+      PORT: 3002
+      DB_PATH: /app/runtime/trip-service.db
+      TRIP_SEED_CSV_PATH: /app/seed/ride_trips.csv
+      DRIVER_SERVICE_URL: http://driver-service:3003
+      PAYMENT_SERVICE_URL: http://payment-service:8082
+    ports:
+      - "3002:3002"
+    volumes:
+      - trip-db-data:/app/runtime
+      - ./trip-service/data:/app/seed:ro
+    depends_on:
+      driver-service:
+        condition: service_healthy
+      payment-service:
+        condition: service_started
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3002/health').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))"
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  payment-db:
+    image: postgres:15
+    container_name: payment-db
+    environment:
+      POSTGRES_DB: paymentdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - payment-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d paymentdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  payment-service:
+    build:
+      context: ./payment-service
+      dockerfile: Dockerfile
+    container_name: payment-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://payment-db:5432/paymentdb?sslmode=disable
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+      TRIP_SERVICE_URL: http://trip-service:3002/v1/trips
+    ports:
+      - "8082:8082"
+    depends_on:
+      payment-db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  rating-db:
+    image: postgres:16-alpine
+    container_name: rating-db
+    environment:
+      POSTGRES_DB: ratings
+      POSTGRES_USER: ratings
+      POSTGRES_PASSWORD: ratings
+    ports:
+      - "5436:5432"
+    volumes:
+      - rating-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ratings -d ratings"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  rating-feedback-service:
+    build:
+      context: ./rating-feedback-service
+      dockerfile: Dockerfile
+    container_name: rating-feedback-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://rating-db:5432/ratings
+      SPRING_DATASOURCE_USERNAME: ratings
+      SPRING_DATASOURCE_PASSWORD: ratings
+      TRIP_SERVICE_BASE_URL: http://trip-service:3002
+    ports:
+      - "8086:8085"
+    depends_on:
+      rating-db:
+        condition: service_healthy
+      trip-service:
+        condition: service_healthy
+    restart: unless-stopped
+
+  vroom-gateway:
+    build:
+      context: ./vroom-gateway
+      dockerfile: Dockerfile
+    container_name: vroom-gateway
+    environment:
+      PORT: 8080
+      RIDER_SERVICE_URL: http://rider-service:8081
+      DRIVER_SERVICE_URL: http://driver-service:3003
+      TRIP_SERVICE_URL: http://trip-service:3002
+      PAYMENT_SERVICE_URL: http://payment-service:8082
+      RATING_SERVICE_URL: http://rating-feedback-service:8085
+    ports:
+      - "8080:8080"
+    depends_on:
+      rider-service:
+        condition: service_started
+      driver-service:
+        condition: service_healthy
+      trip-service:
+        condition: service_healthy
+      payment-service:
+        condition: service_started
+      rating-feedback-service:
+        condition: service_started
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:8080/health').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))"
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  vroom-ui:
+    build:
+      context: ./vroom-ui
+      dockerfile: Dockerfile
+    container_name: vroom-ui
+    environment:
+      PORT: 5173
+      VROOM_GATEWAY_URL: http://vroom-gateway:8080
+      VROOM_GATEWAY_PUBLIC_URL: http://localhost:8080
+    ports:
+      - "5173:5173"
+    depends_on:
+      vroom-gateway:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:5173/health').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))"
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    container_name: driver-service-prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./driver-service/observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    depends_on:
+      driver-service:
+        condition: service_healthy
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.2.2
+    container_name: driver-service-grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./driver-service/observability/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./driver-service/observability/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./driver-service/observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+volumes:
+  payment-db-data:
+  rating-db-data:
+  driver-db-data:
+  trip-db-data:
+  prometheus-data:
+  grafana-data:

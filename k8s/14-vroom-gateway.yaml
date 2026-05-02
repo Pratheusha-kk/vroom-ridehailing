@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vroom-gateway
+  namespace: ride-hailing
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vroom-gateway
+  template:
+    metadata:
+      labels:
+        app: vroom-gateway
+    spec:
+      containers:
+        - name: vroom-gateway
+          image: vroom-gateway:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          env:
+            - name: PORT
+              value: "8080"
+            - name: RIDER_SERVICE_URL
+              value: http://rider-service:8081
+            - name: DRIVER_SERVICE_URL
+              value: http://driver-service:3003
+            - name: TRIP_SERVICE_URL
+              value: http://trip-service:3002
+            - name: PAYMENT_SERVICE_URL
+              value: http://payment-service:8082
+            - name: RATING_SERVICE_URL
+              value: http://rating-feedback-service:8085
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vroom-gateway
+  namespace: ride-hailing
+spec:
+  type: NodePort
+  selector:
+    app: vroom-gateway
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+      nodePort: 30080

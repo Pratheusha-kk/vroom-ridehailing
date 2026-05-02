@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vroom-ui
+  namespace: ride-hailing
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vroom-ui
+  template:
+    metadata:
+      labels:
+        app: vroom-ui
+    spec:
+      containers:
+        - name: vroom-ui
+          image: vroom-ui:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5173
+          env:
+            - name: PORT
+              value: "5173"
+            - name: VROOM_GATEWAY_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: service-config
+                  key: VROOM_GATEWAY_URL
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5173
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5173
+            initialDelaySeconds: 15
+            periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vroom-ui
+  namespace: ride-hailing
+spec:
+  type: NodePort
+  selector:
+    app: vroom-ui
+  ports:
+    - name: http
+      port: 5173
+      targetPort: 5173
+      nodePort: 30085

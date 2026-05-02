@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: driver-service
+  namespace: ride-hailing
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: driver-service
+  template:
+    metadata:
+      labels:
+        app: driver-service
+    spec:
+      containers:
+        - name: driver-service
+          image: driver-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3003
+          env:
+            - name: PORT
+              value: "3003"
+            - name: SERVICE_NAME
+              value: driver-service
+            - name: DB_PATH
+              value: /app/data/driver-service.db
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3003
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3003
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          volumeMounts:
+            - name: driver-data
+              mountPath: /app/data
+      volumes:
+        - name: driver-data
+          persistentVolumeClaim:
+            claimName: driver-sqlite-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: driver-service
+  namespace: ride-hailing
+spec:
+  type: NodePort
+  selector:
+    app: driver-service
+  ports:
+    - name: http
+      port: 3003
+      targetPort: 3003
+      nodePort: 30083

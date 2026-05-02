@@ -1,0 +1,1105 @@
+{
+  "info": {
+    "_postman_id": "f0f50599-8aa1-4de8-baab-c3fe072181a4",
+    "name": "Scalable Assignment",
+    "description": "Aggregated Postman collection for the ride-hailing scalable systems assignment. Each service collection is grouped as a folder.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Rider Service",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{riderBaseUrl}}/actuator/health",
+              "host": [
+                "{{riderBaseUrl}}"
+              ],
+              "path": [
+                "actuator",
+                "health"
+              ]
+            }
+          },
+          "description": "Checks Rider Service health through Spring Boot Actuator."
+        },
+        {
+          "name": "Prometheus Metrics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{riderBaseUrl}}/actuator/prometheus",
+              "host": [
+                "{{riderBaseUrl}}"
+              ],
+              "path": [
+                "actuator",
+                "prometheus"
+              ]
+            }
+          },
+          "description": "Returns Rider Service Prometheus metrics."
+        },
+        {
+          "name": "Create Rider",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.data && json.data.riderId) pm.collectionVariables.set(\"riderId\", json.data.riderId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"phone\": \"1234567890\",\n  \"city\": \"New York\"\n}"
+            },
+            "url": {
+              "raw": "{{riderBaseUrl}}/v1/riders",
+              "host": [
+                "{{riderBaseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "riders"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Riders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{riderBaseUrl}}/v1/riders",
+              "host": [
+                "{{riderBaseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "riders"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Rider By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{riderBaseUrl}}/v1/riders/{{riderId}}",
+              "host": [
+                "{{riderBaseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "riders",
+                "{{riderId}}"
+              ]
+            }
+          },
+          "description": "Fetches a rider by numeric ID."
+        },
+        {
+          "name": "Update Rider",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe Updated\",\n  \"email\": \"john.doe.updated@example.com\",\n  \"phone\": \"0987654321\",\n  \"city\": \"Los Angeles\"\n}"
+            },
+            "url": {
+              "raw": "{{riderBaseUrl}}/v1/riders/{{riderId}}",
+              "host": [
+                "{{riderBaseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "riders",
+                "{{riderId}}"
+              ]
+            }
+          },
+          "description": "Updates a rider by numeric ID."
+        },
+        {
+          "name": "Delete Rider",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{riderBaseUrl}}/v1/riders/{{riderId}}",
+              "host": [
+                "{{riderBaseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "riders",
+                "{{riderId}}"
+              ]
+            }
+          },
+          "description": "Deletes a rider by numeric ID. Use this carefully during demos because it removes the selected rider."
+        }
+      ],
+      "description": "Postman collection for the BITS ride-hailing Rider Service. Rider lookup/update/delete endpoints use the numeric rider id from ride_riders.csv."
+    },
+    {
+      "name": "Driver Service",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{driverBaseUrl}}/health",
+              "host": [
+                "{{driverBaseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "Checks whether the Driver Service is running."
+          }
+        },
+        {
+          "name": "List Drivers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{driverBaseUrl}}/v1/drivers",
+              "host": [
+                "{{driverBaseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "drivers"
+              ]
+            },
+            "description": "Returns all drivers in the service database."
+          }
+        },
+        {
+          "name": "List Active Drivers In Bengaluru",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{driverBaseUrl}}/v1/drivers?is_active=true&city=Bengaluru&limit=10",
+              "host": [
+                "{{driverBaseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "drivers"
+              ],
+              "query": [
+                {
+                  "key": "is_active",
+                  "value": "true"
+                },
+                {
+                  "key": "city",
+                  "value": "Bengaluru"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Used to show only active drivers that Trip Service can assign."
+          }
+        },
+        {
+          "name": "Get Driver By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{driverBaseUrl}}/v1/drivers/{{driverId}}",
+              "host": [
+                "{{driverBaseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "drivers",
+                "{{driverId}}"
+              ]
+            },
+            "description": "Fetches one driver and its status history."
+          }
+        },
+        {
+          "name": "Update Driver",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nikhil Bose\",\n  \"phone\": \"9059702987\",\n  \"email\": \"nikhil.bose644@gmail.com\",\n  \"vehicle_type\": \"Sedan\",\n  \"vehicle_model\": \"Honda City\",\n  \"vehicle_plate\": \"TS37DZ2639\",\n  \"city\": \"Bengaluru\",\n  \"is_active\": true\n}"
+            },
+            "url": {
+              "raw": "{{driverBaseUrl}}/v1/drivers/{{driverId}}",
+              "host": [
+                "{{driverBaseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "drivers",
+                "{{driverId}}"
+              ]
+            },
+            "description": "Updates an existing driver's profile and vehicle details."
+          }
+        },
+        {
+          "name": "Create Driver",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 101,\n  \"name\": \"Amar Rao\",\n  \"phone\": \"9876543210\",\n  \"email\": \"amar.rao@example.com\",\n  \"vehicle_type\": \"SUV\",\n  \"vehicle_model\": \"Hyundai Creta\",\n  \"vehicle_plate\": \"KA01AB1234\",\n  \"city\": \"Bengaluru\",\n  \"created_at\": \"2025-07-30T05:58:56.000Z\",\n  \"is_active\": true\n}"
+            },
+            "url": {
+              "raw": "{{driverBaseUrl}}/v1/drivers",
+              "host": [
+                "{{driverBaseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "drivers"
+              ]
+            },
+            "description": "Onboards a new driver with vehicle details."
+          }
+        },
+        {
+          "name": "Update Driver Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"is_active\": false,\n  \"reason\": \"driver_signed_off\"\n}"
+            },
+            "url": {
+              "raw": "{{driverBaseUrl}}/v1/drivers/{{driverId}}/status",
+              "host": [
+                "{{driverBaseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "drivers",
+                "{{driverId}}",
+                "status"
+              ]
+            },
+            "description": "Marks a driver active or inactive."
+          }
+        }
+      ],
+      "description": "Postman collection for the BITS ride-hailing Driver Service assignment."
+    },
+    {
+      "name": "Trip Service",
+      "item": [
+        {
+          "name": "Health Check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('service is healthy', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{tripBaseUrl}}/health",
+              "host": [
+                "{{tripBaseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "Checks whether the Trip Service is running."
+          }
+        },
+        {
+          "name": "Metrics Snapshot",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{tripBaseUrl}}/metrics",
+              "host": [
+                "{{tripBaseUrl}}"
+              ],
+              "path": [
+                "metrics"
+              ]
+            },
+            "description": "Returns Trip Service request, status, CPU, and memory metrics as JSON."
+          }
+        },
+        {
+          "name": "Prometheus Metrics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{tripBaseUrl}}/metrics/prometheus",
+              "host": [
+                "{{tripBaseUrl}}"
+              ],
+              "path": [
+                "metrics",
+                "prometheus"
+              ]
+            },
+            "description": "Returns Trip Service metrics in Prometheus exposition format."
+          }
+        },
+        {
+          "name": "Create Trip",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('trip created', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "if (json.id) pm.collectionVariables.set('tripId', json.id);",
+                  "if (json.driver_id) pm.collectionVariables.set('driverId', json.driver_id);",
+                  "if (json.fare) pm.collectionVariables.set('tripFare', json.fare);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rider_id\": {{riderId}},\n  \"pickup\": \"MG Road, Bengaluru\",\n  \"drop\": \"Indiranagar, Bengaluru\",\n  \"city\": \"{{city}}\"\n}"
+            },
+            "url": {
+              "raw": "{{tripBaseUrl}}/v1/trips",
+              "host": [
+                "{{tripBaseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "trips"
+              ]
+            },
+            "description": "Creates a trip by asking Driver Service for an active driver in the requested city."
+          }
+        },
+        {
+          "name": "Get Trip By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{tripBaseUrl}}/v1/trips/{{tripId}}",
+              "host": [
+                "{{tripBaseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "trips",
+                "{{tripId}}"
+              ]
+            },
+            "description": "Fetches the current trip state and fare details."
+          }
+        },
+        {
+          "name": "Get Trip Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{tripBaseUrl}}/v1/trips/{{tripId}}/status",
+              "host": [
+                "{{tripBaseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "trips",
+                "{{tripId}}",
+                "status"
+              ]
+            },
+            "description": "Returns the trip status as plain text for Payment Service verification."
+          }
+        },
+        {
+          "name": "Accept Trip",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{tripBaseUrl}}/v1/trips/{{tripId}}/accept",
+              "host": [
+                "{{tripBaseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "trips",
+                "{{tripId}}",
+                "accept"
+              ]
+            },
+            "description": "Moves the trip from REQUESTED to ACCEPTED."
+          }
+        },
+        {
+          "name": "Start Trip",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{tripBaseUrl}}/v1/trips/{{tripId}}/start",
+              "host": [
+                "{{tripBaseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "trips",
+                "{{tripId}}",
+                "start"
+              ]
+            },
+            "description": "Moves the trip from ACCEPTED to ONGOING."
+          }
+        },
+        {
+          "name": "Complete Trip",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{tripBaseUrl}}/v1/trips/{{tripId}}/complete",
+              "host": [
+                "{{tripBaseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "trips",
+                "{{tripId}}",
+                "complete"
+              ]
+            },
+            "description": "Completes an ONGOING trip and triggers Payment Service charge processing."
+          }
+        },
+        {
+          "name": "Cancel Trip",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{tripBaseUrl}}/v1/trips/{{tripId}}/cancel",
+              "host": [
+                "{{tripBaseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "trips",
+                "{{tripId}}",
+                "cancel"
+              ]
+            },
+            "description": "Cancels a trip that has not started yet. Use this on a separate newly created trip."
+          }
+        },
+        {
+          "name": "Rider Trip Report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{tripBaseUrl}}/v1/trips/reports/riders/{{riderId}}",
+              "host": [
+                "{{tripBaseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "trips",
+                "reports",
+                "riders",
+                "{{riderId}}"
+              ]
+            },
+            "description": "Returns rider trip history enriched with driver and payment details."
+          }
+        },
+        {
+          "name": "Driver Trip Report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{tripBaseUrl}}/v1/trips/reports/drivers/{{driverId}}",
+              "host": [
+                "{{tripBaseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "trips",
+                "reports",
+                "drivers",
+                "{{driverId}}"
+              ]
+            },
+            "description": "Returns driver trip history enriched with rider and payment details."
+          }
+        }
+      ],
+      "description": "Postman collection for the BITS ride-hailing Trip Service. Run Create Trip first, then Accept, Start, Complete, and report/payment lookup requests."
+    },
+    {
+      "name": "Payment Service",
+      "item": [
+        {
+          "name": "Health Check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('service is healthy', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{paymentBaseUrl}}/actuator/health",
+              "host": [
+                "{{paymentBaseUrl}}"
+              ],
+              "path": [
+                "actuator",
+                "health"
+              ]
+            },
+            "description": "Checks Spring Boot Actuator health for Payment Service."
+          }
+        },
+        {
+          "name": "Prometheus Metrics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{paymentBaseUrl}}/actuator/prometheus",
+              "host": [
+                "{{paymentBaseUrl}}"
+              ],
+              "path": [
+                "actuator",
+                "prometheus"
+              ]
+            },
+            "description": "Returns Payment Service Prometheus metrics from Spring Boot Actuator."
+          }
+        },
+        {
+          "name": "List Payments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{paymentBaseUrl}}/v1/payments?limit=25",
+              "host": [
+                "{{paymentBaseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "payments"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "25"
+                }
+              ]
+            },
+            "description": "Returns recent payments ordered by creation time descending."
+          }
+        },
+        {
+          "name": "Charge Completed Trip",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('charge accepted', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "if (json.paymentId) pm.collectionVariables.set('paymentId', json.paymentId);",
+                  "if (json.tripId) pm.collectionVariables.set('tripId', json.tripId);",
+                  "if (json.reference) pm.collectionVariables.set('transactionRef', json.reference);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tripId\": \"{{tripId}}\",\n  \"amount\": {{amount}},\n  \"method\": \"{{paymentMethod}}\",\n  \"transactionRef\": \"{{transactionRef}}\"\n}"
+            },
+            "url": {
+              "raw": "{{paymentBaseUrl}}/v1/payments/charge",
+              "host": [
+                "{{paymentBaseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "payments",
+                "charge"
+              ]
+            },
+            "description": "Processes a mock payment for a COMPLETED trip. Reusing transactionRef returns the existing payment."
+          }
+        },
+        {
+          "name": "Repeat Charge With Same Transaction Ref",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tripId\": \"{{tripId}}\",\n  \"amount\": {{amount}},\n  \"method\": \"{{paymentMethod}}\",\n  \"transactionRef\": \"{{transactionRef}}\"\n}"
+            },
+            "url": {
+              "raw": "{{paymentBaseUrl}}/v1/payments/charge",
+              "host": [
+                "{{paymentBaseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "payments",
+                "charge"
+              ]
+            },
+            "description": "Runs the same charge again to demonstrate idempotency."
+          }
+        },
+        {
+          "name": "Get Payment By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{paymentBaseUrl}}/v1/payments/{{paymentId}}",
+              "host": [
+                "{{paymentBaseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "payments",
+                "{{paymentId}}"
+              ]
+            },
+            "description": "Fetches one payment by its service-owned ID."
+          }
+        },
+        {
+          "name": "Get Latest Payment By Trip Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{paymentBaseUrl}}/v1/payments/trips/{{tripId}}",
+              "host": [
+                "{{paymentBaseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "payments",
+                "trips",
+                "{{tripId}}"
+              ]
+            },
+            "description": "Fetches the latest payment associated with a trip."
+          }
+        },
+        {
+          "name": "Refund Payment",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{paymentBaseUrl}}/v1/payments/{{paymentId}}/refund",
+              "host": [
+                "{{paymentBaseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "payments",
+                "{{paymentId}}",
+                "refund"
+              ]
+            },
+            "description": "Marks a payment as REFUNDED."
+          }
+        }
+      ],
+      "description": "Postman collection for the BITS ride-hailing Payment Service. Charge requests require a completed trip, and transactionRef demonstrates idempotency."
+    },
+    {
+      "name": "Rating Feedback Service",
+      "item": [
+        {
+          "name": "Health Check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('service is healthy', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ratingBaseUrl}}/actuator/health",
+              "host": [
+                "{{ratingBaseUrl}}"
+              ],
+              "path": [
+                "actuator",
+                "health"
+              ]
+            },
+            "description": "Checks Spring Boot Actuator health for Rating & Feedback Service."
+          }
+        },
+        {
+          "name": "Prometheus Metrics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ratingBaseUrl}}/actuator/prometheus",
+              "host": [
+                "{{ratingBaseUrl}}"
+              ],
+              "path": [
+                "actuator",
+                "prometheus"
+              ]
+            },
+            "description": "Returns Prometheus metrics, including ratings_submitted_total."
+          }
+        },
+        {
+          "name": "List Ratings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ratingBaseUrl}}/v1/ratings",
+              "host": [
+                "{{ratingBaseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "ratings"
+              ]
+            },
+            "description": "Returns imported and submitted ratings ordered by creation time descending."
+          }
+        },
+        {
+          "name": "Create Rating",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('rating accepted', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "if (json.id) pm.collectionVariables.set('ratingId', json.id);",
+                  "if (json.tripId) pm.collectionVariables.set('tripId', json.tripId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Correlation-Id",
+                "value": "{{correlationId}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"raterType\": \"RIDER\",\n  \"raterId\": {{riderId}},\n  \"targetType\": \"DRIVER\",\n  \"targetId\": {{driverId}},\n  \"score\": 5,\n  \"feedback\": \"Clean car and smooth pickup.\"\n}"
+            },
+            "url": {
+              "raw": "{{ratingBaseUrl}}/v1/trips/{{tripId}}/rating",
+              "host": [
+                "{{ratingBaseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "trips",
+                "{{tripId}}",
+                "rating"
+              ]
+            },
+            "description": "Submits a rider-to-driver rating for a completed trip."
+          }
+        },
+        {
+          "name": "List Ratings By Trip",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ratingBaseUrl}}/v1/trips/{{tripId}}/ratings",
+              "host": [
+                "{{ratingBaseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "trips",
+                "{{tripId}}",
+                "ratings"
+              ]
+            },
+            "description": "Returns all ratings stored for one trip."
+          }
+        },
+        {
+          "name": "Get Rating By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ratingBaseUrl}}/v1/ratings/{{ratingId}}",
+              "host": [
+                "{{ratingBaseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "ratings",
+                "{{ratingId}}"
+              ]
+            },
+            "description": "Fetches one rating by UUID."
+          }
+        },
+        {
+          "name": "Driver Rating Summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ratingBaseUrl}}/v1/ratings/DRIVER/{{driverId}}/summary",
+              "host": [
+                "{{ratingBaseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "ratings",
+                "DRIVER",
+                "{{driverId}}",
+                "summary"
+              ]
+            },
+            "description": "Returns rating count and average score for a driver."
+          }
+        },
+        {
+          "name": "Rider Rating Summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ratingBaseUrl}}/v1/ratings/RIDER/{{riderId}}/summary",
+              "host": [
+                "{{ratingBaseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "ratings",
+                "RIDER",
+                "{{riderId}}",
+                "summary"
+              ]
+            },
+            "description": "Returns rating count and average score for a rider."
+          }
+        }
+      ],
+      "description": "Postman collection for the BITS ride-hailing Rating & Feedback Service. Create Rating requires a completed trip unless the service is running with TRIP_SERVICE_MOCK_COMPLETED=true."
+    }
+  ],
+  "variable": [
+    {
+      "key": "gatewayBaseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "riderBaseUrl",
+      "value": "http://localhost:8081"
+    },
+    {
+      "key": "driverBaseUrl",
+      "value": "http://localhost:3003"
+    },
+    {
+      "key": "tripBaseUrl",
+      "value": "http://localhost:3002"
+    },
+    {
+      "key": "paymentBaseUrl",
+      "value": "http://localhost:8082"
+    },
+    {
+      "key": "ratingBaseUrl",
+      "value": "http://localhost:8086"
+    },
+    {
+      "key": "riderId",
+      "value": "1"
+    },
+    {
+      "key": "driverId",
+      "value": "1"
+    },
+    {
+      "key": "tripId",
+      "value": "101"
+    },
+    {
+      "key": "paymentId",
+      "value": "1"
+    },
+    {
+      "key": "ratingId",
+      "value": "00000000-0000-0000-0000-000000000001"
+    },
+    {
+      "key": "city",
+      "value": "Bengaluru"
+    },
+    {
+      "key": "amount",
+      "value": "248.50"
+    },
+    {
+      "key": "paymentMethod",
+      "value": "UPI"
+    },
+    {
+      "key": "transactionRef",
+      "value": "postman-trip-101"
+    },
+    {
+      "key": "correlationId",
+      "value": "demo-correlation-001"
+    }
+  ]
+}

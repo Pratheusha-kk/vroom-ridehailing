@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: trip-service
+  namespace: ride-hailing
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: trip-service
+  template:
+    metadata:
+      labels:
+        app: trip-service
+    spec:
+      containers:
+        - name: trip-service
+          image: trip-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3002
+          env:
+            - name: PORT
+              value: "3002"
+            - name: DB_PATH
+              value: /app/data/trip-service.db
+            - name: DRIVER_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: service-config
+                  key: DRIVER_SERVICE_URL
+            - name: PAYMENT_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: service-config
+                  key: PAYMENT_SERVICE_URL
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3002
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3002
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          volumeMounts:
+            - name: trip-data
+              mountPath: /app/data
+      volumes:
+        - name: trip-data
+          persistentVolumeClaim:
+            claimName: trip-sqlite-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: trip-service
+  namespace: ride-hailing
+spec:
+  type: NodePort
+  selector:
+    app: trip-service
+  ports:
+    - name: http
+      port: 3002
+      targetPort: 3002
+      nodePort: 30082
