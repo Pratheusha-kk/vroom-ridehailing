@@ -8,6 +8,12 @@ For a beginner-friendly setup from a new laptop, including clone commands, Docke
 
 - [VROOM VROOM Setup From Fresh Machine](docs/SETUP_FROM_FRESH_MACHINE.md)
 
+## Architecture
+
+For the microservice architecture diagram, database-per-service ownership, and table details, read:
+
+- [VROOM VROOM Architecture Diagram](docs/ARCHITECTURE_DIAGRAM.md)
+
 ## Services
 
 - `rider-service` on `http://localhost:8081`
